@@ -2,6 +2,7 @@ use eframe::egui;
 use gumdrop::Options;
 use log::{LevelFilter, info};
 use pnet::datalink::{self, NetworkInterface};
+use serde::{Deserialize, Serialize};
 
 mod egui_theme;
 
@@ -25,7 +26,7 @@ enum Command {
 #[derive(Debug, Options)]
 struct SendPacketOptions {}
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 struct EguiProgram {
     interfaces: Vec<NetworkInterface>,
     selected_iface_index: usize,
@@ -41,19 +42,26 @@ impl EguiProgram {
 
         let interfaces = datalink::interfaces();
 
-        // 2. Build the ComboBox UI
-        egui::ComboBox::from_label("Dynamic Dropdown")
-            .selected_text(interfaces[selected_index])
-            .show_ui(ui, |ui| {
-                // Iterate over the dynamic vector to populate elements
-                for (index, item) in my_items.iter().enumerate() {
-                    // Alternatively use selectable_value for state binding
-                    ui.selectable_value(&mut selected_index, index, *item);
-                }
-            });
+        // check for previously saved state
 
-        EguiProgram {
-            interfaces: datalink::interfaces(),
+        if let Some(storage) = cc.storage {
+            // retrieve state, but ignore the list of interfaces as they may have changed
+            eframe::get_value(storage, eframe::APP_KEY)
+                .map(|mut program: EguiProgram| {
+                    program.selected_iface_index =
+                        program.selected_iface_index.max(interfaces.len());
+                    program.interfaces = interfaces.clone();
+                    program
+                })
+                .unwrap_or(EguiProgram {
+                    interfaces,
+                    selected_iface_index: 0,
+                })
+        } else {
+            EguiProgram {
+                interfaces,
+                selected_iface_index: 0,
+            }
         }
     }
 }
@@ -61,7 +69,21 @@ impl EguiProgram {
 impl eframe::App for EguiProgram {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            ui.heading("Hello World!");
+            ui.heading("fuck my life");
+
+            if !self.interfaces.is_empty() && self.selected_iface_index < self.interfaces.len() {
+                let current_selection = &self.interfaces[self.selected_iface_index].name;
+
+                egui::ComboBox::from_label("network interface")
+                    .selected_text(current_selection)
+                    .show_ui(ui, |ui| {
+                        for (index, item) in self.interfaces.iter().enumerate() {
+                            ui.selectable_value(&mut self.selected_iface_index, index, &item.name);
+                        }
+                    });
+            } else {
+                ui.label("No interfaces available or invalid index.");
+            }
         });
     }
 }
@@ -82,6 +104,7 @@ fn main() -> eframe::Result {
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([768.0, 768.0]),
+        persist_window: false,
         ..Default::default()
     };
 

@@ -119,6 +119,7 @@ pub struct Theme {
     pub crust: Color32,
 }
 
+#[allow(unused)]
 pub const LATTE: Theme = Theme {
     rosewater: Color32::from_rgb(220, 138, 120),
     flamingo: Color32::from_rgb(221, 120, 120),
@@ -148,6 +149,7 @@ pub const LATTE: Theme = Theme {
     crust: Color32::from_rgb(220, 224, 232),
 };
 
+#[allow(unused)]
 pub const FRAPPE: Theme = Theme {
     rosewater: Color32::from_rgb(242, 213, 207),
     flamingo: Color32::from_rgb(238, 190, 190),
@@ -177,6 +179,7 @@ pub const FRAPPE: Theme = Theme {
     crust: Color32::from_rgb(35, 38, 52),
 };
 
+#[allow(unused)]
 pub const MACCHIATO: Theme = Theme {
     rosewater: Color32::from_rgb(244, 219, 214),
     flamingo: Color32::from_rgb(240, 198, 198),
@@ -206,6 +209,7 @@ pub const MACCHIATO: Theme = Theme {
     crust: Color32::from_rgb(24, 25, 38),
 };
 
+#[allow(unused)]
 pub const MOCHA: Theme = Theme {
     rosewater: Color32::from_rgb(245, 224, 220),
     flamingo: Color32::from_rgb(242, 205, 205),
